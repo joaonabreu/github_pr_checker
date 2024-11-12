@@ -14,14 +14,19 @@ def load_dotenv():
 load_dotenv()
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-REPOS = ["org/repo1", "org/repo2"]
+REPOS = [
+    "Flutter-Global/fcq-service",
+    "Flutter-Global/psa-service",
+    "Flutter-Global/sco-service",
+    "Flutter-Global/wlp-service",
+    "Flutter-Global/foe-service"
+]
 
 
 def print_repo_header(repo):
-    header = f" Open PRs for {repo} "
-    print("=" * len(header))
-    print(header)
-    print("=" * len(header))
+    print("=" * len(repo))
+    print(repo)
+    print("=" * len(repo))
 
 def check_open_prs(repo):
     print_repo_header(repo)
@@ -40,7 +45,6 @@ def check_open_prs(repo):
             for pr in open_prs:
                 if "dependabot" not in pr['user']['login']:
                     print(f"- #{pr['number']}: {pr['title']} by {pr['user']['login']}")
-                    print(f"  Link: {pr['html_url']}")
         else:
             print("No open PRs")
     else:
