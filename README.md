@@ -23,9 +23,24 @@ This script checks for open PRs in specified GitHub repositories and lists them 
      ```
 
 3. **Specify Your Repositories**:
-   - In the script (`github_pr_checker.py`), add your repositories in the `REPOS` list using the format `"org/repo_name"`:
+   - In the script (`github_pr_checker.py`), add your repositories in the `REPOS` list using the format `"org/service_name"`:
      ```python
-     REPOS = ["org/repo1", "org/repo2"]
+     REPOS = {
+        "abc": [
+            "org/abc-service",
+            "org/abc-chef-ppb",
+            "org/abc-configrepo-i2-ppb",
+            "org/abc-configrepo-i2-pp",
+            "org/abc-configrepo-i2-sbg",    
+        ],
+        "def": [
+            "org/def-service",
+            "org/def-chef-ppb",
+            "org/def-configrepo-i2-ppb",
+            "org/def-configrepo-i2-pp",
+            "org/def-configrepo-i2-sbg",
+        ],
+     }
      ```
 
 ## Usage
@@ -33,8 +48,12 @@ This script checks for open PRs in specified GitHub repositories and lists them 
 1. **Run the Script**:
    - Run the script with Python:
      ```bash
-     python3 github_pr_checker.py
+     python3 github_pr_checker.py service_name
      ```
+    - e.g.
+        ```bash
+        python3 github_pr_checker.py abc
+        ```
 
 2. **Output**:
    - The script will print open PRs for each repository in a visually distinct format, with a title, author, and link for each PR.
@@ -47,6 +66,28 @@ org/repo1
 =========
 - #23: Fix bug in login by user123
 - #45: Add new feature by user456
+
+==========================
+org/abc-service
+==========================
+- Flutter-Global/abc-service#23: Fix bug in login by [user123]
+- Flutter-Global/abc-service#45: Add new feature by user456 [user456]
+===========================
+Flutter-Global/abc-chef-ppb
+===========================
+- Flutter-Global/abc-chef-ppb#1: Fix bug by [user123]
+====================================
+Flutter-Global/abc-configrepo-i2-ppb
+====================================
+- Flutter-Global/abc-configrepo-i2-ppb#1: Fix bug in login by [user123]
+===================================
+Flutter-Global/abc-configrepo-i2-pp
+===================================
+No open PRs
+====================================
+Flutter-Global/abc-configrepo-i2-sbg
+====================================
+No open PRs
 ```
 
 ## Notes
