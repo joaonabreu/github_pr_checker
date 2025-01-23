@@ -52,6 +52,11 @@ REPOS = {
     ],
 }
 
+def format_pr_with_link(repo, pr):
+    base_url = "https://github.com"
+    link = f"{base_url}/{repo}/pull/{pr['number']}"
+    return f"- \033]8;;{link}\033\\{repo}#{pr['number']}\033]8;;\033\\: {pr['title']} [{pr['user']['login']}]"
+
 def isPREligible(pr):
     return "dependabot" not in pr['user']['login']
 
@@ -76,7 +81,7 @@ def check_open_prs(repo):
         if open_prs:
             for pr in open_prs:
                 if isPREligible(pr):
-                    print(f"- #{pr['number']}: {pr['title']} by {pr['user']['login']}")
+                    print(format_pr_with_link(repo, pr))
         else:
             print("No open PRs")
     else:
