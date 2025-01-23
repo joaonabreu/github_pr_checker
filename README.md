@@ -61,12 +61,6 @@ This script checks for open PRs in specified GitHub repositories and lists them 
 ## Example Output
 
 ```
-=========
-org/repo1
-=========
-- #23: Fix bug in login by user123
-- #45: Add new feature by user456
-
 ==========================
 org/abc-service
 ==========================
