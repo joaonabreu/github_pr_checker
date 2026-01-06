@@ -54,6 +54,10 @@ This script checks for open PRs in specified GitHub repositories and lists them 
         ```bash
         python3 github_pr_checker.py abc
         ```
+   - To check all repositories at once:
+        ```bash
+        python3 github_pr_checker.py all
+        ```
 
 2. **Output**:
    - The script will print open PRs for each repository in a visually distinct format, with a title, author, and link for each PR.

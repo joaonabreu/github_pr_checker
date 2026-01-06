@@ -2,6 +2,7 @@ import http.client
 import json
 import os
 import sys
+from datetime import datetime
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 env_path = os.path.join(script_dir, '.env')
@@ -50,12 +51,18 @@ REPOS = {
         "Flutter-Global/foe-chef-ppb",
         "Flutter-Global/foe-ansible-ppb",
     ],
+    "bme": [
+        "Flutter-Global/bme-service",
+        "Flutter-Global/bme-chef-uki",
+        "Flutter-Global/bme-configrepo-i2-sbg",
+    ],
 }
 
 def format_pr_with_link(repo, pr):
     base_url = "https://github.com"
     link = f"{base_url}/{repo}/pull/{pr['number']}"
-    return f"- \033]8;;{link}\033\\{repo}#{pr['number']}\033]8;;\033\\: {pr['title']} [{pr['user']['login']}]"
+    created_date = datetime.strptime(pr['created_at'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+    return f"- \033]8;;{link}\033\\{repo}#{pr['number']}\033]8;;\033\\: {pr['title']} [{pr['user']['login']}] (opened: {created_date})"
 
 def isPREligible(pr):
     return "dependabot" not in pr['user']['login']
@@ -89,8 +96,17 @@ def check_open_prs(repo):
     conn.close()
 
 repo = sys.argv[1] if len(sys.argv) > 1 else None
-if repo:
+if repo == "all":
+    for category, repos in REPOS.items():
+        print(f"\n{'#' * 50}")
+        print(f"# {category.upper()}")
+        print(f"{'#' * 50}\n")
+        for r in repos:
+            check_open_prs(r)
+            print()
+elif repo:
     for r in REPOS[repo]:
         check_open_prs(r)
 else:
     print("You need to specify a repo to check. E.g. python github_pr_checker.py fcq")
+    print("Or use 'all' to check all repos: python github_pr_checker.py all")
