@@ -48,7 +48,9 @@ REPOS = {
     ],
     "foe": [
         "Flutter-Global/foe-service",
-        "Flutter-Global/foe-chef-ppb",
+        "Flutter-Global/foe-configrepo-i2-bf",
+        "Flutter-Global/foe-configrepo-i2-pp",
+        "Flutter-Global/foe-configrepo-i2-sbg",
         "Flutter-Global/foe-ansible-ppb",
     ],
     "bme": [
