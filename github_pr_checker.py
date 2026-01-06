@@ -64,7 +64,14 @@ def format_pr_with_link(repo, pr):
     base_url = "https://github.com"
     link = f"{base_url}/{repo}/pull/{pr['number']}"
     created_date = datetime.strptime(pr['created_at'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-    return f"- \033]8;;{link}\033\\{repo}#{pr['number']}\033]8;;\033\\: {pr['title']} [{pr['user']['login']}] (opened: {created_date})"
+    
+    output = []
+    output.append(f"\n  - PR #{pr['number']}: {pr['title']}")
+    output.append(f"    Author: {pr['user']['login']}")
+    output.append(f"    Opened: {created_date}")
+    output.append(f"    Link: {link}")
+    
+    return "\n".join(output)
 
 def isPREligible(pr):
     return "dependabot" not in pr['user']['login']
