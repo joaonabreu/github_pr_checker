@@ -13,6 +13,7 @@ This script checks for open PRs in specified GitHub repositories and lists them 
    - Go to [GitHub Developer Settings](https://github.com/settings/tokens) > **Personal access tokens** > **Tokens (classic)** > **Generate new token**.
    - Name the token and set its expiration date.
    - Check the `repo` scope to ensure access to private repositories.
+   - Authorise Flutter-Globall org.
    - Click **Generate token** and copy the token.
 
 2. **Create a `.env` File**:
