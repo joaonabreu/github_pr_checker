@@ -1,18 +1,21 @@
+import argparse
 import http.client
 import json
 import os
-import sys
 from datetime import datetime
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-env_path = os.path.join(script_dir, '.env')
+GITHUB_BASE_URL = "https://github.com"
+_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+
 
 def load_dotenv():
-    with open(env_path) as f:
+    with open(_ENV_PATH) as f:
         for line in f:
-            if line.strip() and not line.startswith('#'):
-                key, value = line.strip().split('=', 1)
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, value = line.split('=', 1)
                 os.environ[key] = value
+
 
 load_dotenv()
 
@@ -23,7 +26,7 @@ REPOS = {
         "Flutter-Global/fcq-chef-ppb",
         "Flutter-Global/fcq-configrepo-i2-ppb",
         "Flutter-Global/fcq-configrepo-i2-pp",
-        "Flutter-Global/fcq-configrepo-i2-sbg",    
+        "Flutter-Global/fcq-configrepo-i2-sbg",
     ],
     "psa": [
         "Flutter-Global/psa-service",
@@ -60,62 +63,74 @@ REPOS = {
     ],
 }
 
-def format_pr_with_link(repo, pr):
-    base_url = "https://github.com"
-    link = f"{base_url}/{repo}/pull/{pr['number']}"
-    created_date = datetime.strptime(pr['created_at'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-    
-    output = []
-    output.append(f"\n  - PR #{pr['number']}: {pr['title']}")
-    output.append(f"    Author: {pr['user']['login']}")
-    output.append(f"    Opened: {created_date}")
-    output.append(f"    Link: {link}")
-    
-    return "\n".join(output)
 
-def isPREligible(pr):
-    return "dependabot" not in pr['user']['login']
+def format_pr(repo, pr):
+    link = f"{GITHUB_BASE_URL}/{repo}/pull/{pr['number']}"
+    created_date = datetime.strptime(pr['created_at'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+    labels = ", ".join(lbl['name'] for lbl in pr['labels']) or "none"
+    return (
+        f"\n  - PR #{pr['number']}: {pr['title']}\n"
+        f"    Author: {pr['user']['login']}\n"
+        f"    Opened: {created_date}\n"
+        f"    Labels: {labels}\n"
+        f"    Link: {link}"
+    )
+
+
+def has_label(pr, label):
+    return any(lbl['name'].lower() == label.lower() for lbl in pr['labels'])
+
+
+def is_pr_eligible(pr, label=None):
+    if "dependabot" in pr['user']['login']:
+        return False
+    if label and not has_label(pr, label):
+        return False
+    return True
+
 
 def print_repo_header(repo):
-    print("=" * len(repo))
-    print(repo)
-    print("=" * len(repo))
+    sep = "=" * len(repo)
+    print(f"{sep}\n{repo}\n{sep}")
 
-def check_open_prs(repo):
+
+def check_open_prs(repo, label=None):
     conn = http.client.HTTPSConnection("api.github.com")
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "User-Agent": "PR-Checker"
-    }
-    url = f"/repos/{repo}/pulls?state=open"
-    conn.request("GET", url, headers=headers)
-    
+    headers = {"Authorization": f"token {GITHUB_TOKEN}", "User-Agent": "PR-Checker"}
+    conn.request("GET", f"/repos/{repo}/pulls?state=open", headers=headers)
     response = conn.getresponse()
-    if response.status == 200:
-        open_prs = json.loads(response.read().decode())
-        print_repo_header(repo)
-        if open_prs:
-            for pr in open_prs:
-                if isPREligible(pr):
-                    print(format_pr_with_link(repo, pr))
-        else:
-            print("No open PRs")
-    else:
-        print(f"Failed to fetch PRs for {repo}: {response.status}")
+    body = response.read()
     conn.close()
 
-repo = sys.argv[1] if len(sys.argv) > 1 else None
-if repo == "all":
-    for category, repos in REPOS.items():
-        print(f"\n{'#' * 50}")
-        print(f"# {category.upper()}")
-        print(f"{'#' * 50}\n")
-        for r in repos:
-            check_open_prs(r)
-            print()
-elif repo:
-    for r in REPOS[repo]:
-        check_open_prs(r)
-else:
-    print("You need to specify a repo to check. E.g. python github_pr_checker.py fcq")
-    print("Or use 'all' to check all repos: python github_pr_checker.py all")
+    print_repo_header(repo)
+    if response.status != 200:
+        print(f"Failed to fetch PRs for {repo}: {response.status}")
+        return
+
+    prs = [pr for pr in json.loads(body.decode()) if is_pr_eligible(pr, label)]
+    if prs:
+        for pr in prs:
+            print(format_pr(repo, pr))
+    else:
+        print("No open PRs")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Check open GitHub PRs")
+    parser.add_argument("repo", help=f"Repo group to check, or 'all'. Available: {', '.join(REPOS)}")
+    parser.add_argument("-l", "--label", help="Filter PRs by label (e.g. 'major')", default=None)
+    args = parser.parse_args()
+
+    if args.repo == "all":
+        for category, repos in REPOS.items():
+            print(f"\n{'#' * 50}\n# {category.upper()}\n{'#' * 50}\n")
+            for r in repos:
+                check_open_prs(r, args.label)
+                print()
+    else:
+        for r in REPOS[args.repo]:
+            check_open_prs(r, args.label)
+
+
+if __name__ == "__main__":
+    main()

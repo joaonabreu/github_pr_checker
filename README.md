@@ -47,21 +47,27 @@ This script checks for open PRs in specified GitHub repositories and lists them 
 ## Usage
 
 1. **Run the Script**:
-   - Run the script with Python:
+   - Check PRs for a specific group:
      ```bash
-     python3 github_pr_checker.py service_name
+     python3 github_pr_checker.py abc
      ```
-    - e.g.
-        ```bash
-        python3 github_pr_checker.py abc
-        ```
-   - To check all repositories at once:
-        ```bash
-        python3 github_pr_checker.py all
-        ```
+   - Check all repository groups at once:
+     ```bash
+     python3 github_pr_checker.py all
+     ```
+   - Filter PRs by label (e.g. only show PRs tagged `major`):
+     ```bash
+     python3 github_pr_checker.py abc --label major
+     # or using the short flag:
+     python3 github_pr_checker.py abc -l major
+     ```
+   - Combine with `all` to find labelled PRs across every group:
+     ```bash
+     python3 github_pr_checker.py all --label major
+     ```
 
 2. **Output**:
-   - The script will print open PRs for each repository in a visually distinct format, with a title, author, and link for each PR.
+   - The script prints open PRs for each repository with their title, author, open date, labels, and a direct link. PRs authored by Dependabot are automatically excluded.
 
 ## Example Output
 
